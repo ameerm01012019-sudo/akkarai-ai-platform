@@ -4,20 +4,109 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Akkarai Herbals</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    #chatBox {
+      border: 1px solid #ccc;
+      padding: 15px;
+      min-height: 180px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+
+    .user {
+      margin: 8px 0;
+      font-weight: bold;
+    }
+
+    .bot {
+      margin: 8px 0 16px;
+    }
+
+    #message {
+      width: 70%;
+      padding: 10px;
+    }
+
+    button {
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
+
   <h1>Akkarai Herbals</h1>
   <p>Natural herbal solutions for health and wellness.</p>
 
   <h2>AI Assistant Demo</h2>
-  <p>Our AI assistant will appear here soon.</p>
 
-  <h2>Contact Us</h2>
-  <form>
-    <input type="text" placeholder="Your Name"><br><br>
-    <input type="tel" placeholder="Phone Number"><br><br>
-    <textarea placeholder="Your enquiry"></textarea><br><br>
-    <button type="submit">Submit Enquiry</button>
-  </form>
+  <div id="chatBox">
+    <div class="bot">
+      Assistant: Hello! How can I help you today?
+    </div>
+  </div>
+
+  <input
+    id="message"
+    type="text"
+    placeholder="Ask something..."
+  >
+
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const WORKER_URL =
+      "https://akkarai-ai-backend.ameerm01012019.workers.dev";
+
+    async function sendMessage() {
+      const input = document.getElementById("message");
+      const chatBox = document.getElementById("chatBox");
+
+      const message = input.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      chatBox.innerHTML +=
+        `<div class="user">You: ${message}</div>`;
+
+      input.value = "";
+
+      try {
+        const response = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Request failed");
+        }
+
+        chatBox.innerHTML +=
+          `<div class="bot">Assistant: ${data.reply}</div>`;
+
+      } catch (error) {
+        chatBox.innerHTML +=
+          `<div class="bot">Assistant: Connection error.</div>`;
+      }
+    }
+  </script>
+
 </body>
 </html>
