@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -13,10 +12,9 @@
   <title>Akkarai Herbals AI Assistant</title>
 
   <style>
-
     body {
       font-family: Arial, sans-serif;
-      max-width: 850px;
+      max-width: 900px;
       margin: 40px auto;
       padding: 0 20px;
       line-height: 1.5;
@@ -28,19 +26,19 @@
 
     .subtitle {
       margin-top: 0;
-      margin-bottom: 35px;
+      margin-bottom: 30px;
     }
 
     .section {
       border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
+      border-radius: 12px;
+      padding: 22px;
       margin-bottom: 30px;
     }
 
     #chatBox {
-      min-height: 180px;
-      max-height: 400px;
+      min-height: 220px;
+      max-height: 430px;
       overflow-y: auto;
       border: 1px solid #ddd;
       padding: 15px;
@@ -49,12 +47,12 @@
     }
 
     .user {
-      margin: 10px 0;
+      margin: 12px 0;
       font-weight: bold;
     }
 
     .bot {
-      margin: 10px 0 18px;
+      margin: 12px 0 20px;
     }
 
     .chat-controls {
@@ -85,7 +83,7 @@
     }
 
     textarea {
-      min-height: 100px;
+      min-height: 90px;
       resize: vertical;
     }
 
@@ -114,8 +112,18 @@
       color: darkred;
     }
 
-    @media (max-width: 600px) {
+    .hidden {
+      display: none;
+    }
 
+    .lead-card {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid #bbb;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 600px) {
       body {
         margin-top: 20px;
       }
@@ -127,13 +135,9 @@
       #message {
         width: 100%;
       }
-
     }
-
   </style>
-
 </head>
-
 
 <body>
 
@@ -142,9 +146,6 @@
   <p class="subtitle">
     Natural herbal solutions for health and wellness.
   </p>
-
-
-  <!-- AI ASSISTANT -->
 
   <div class="section">
 
@@ -159,7 +160,6 @@
       </div>
 
     </div>
-
 
     <div class="chat-controls">
 
@@ -179,20 +179,103 @@
 
     </div>
 
+    <div
+      id="chatLeadCard"
+      class="lead-card hidden"
+    >
+
+      <h3>Arrange a Callback</h3>
+
+      <p id="chatLeadInstruction">
+        Please provide your details.
+      </p>
+
+      <div id="chatLeadNameStage">
+
+        <label for="chatLeadName">
+          Name
+        </label>
+
+        <input
+          id="chatLeadName"
+          type="text"
+          maxlength="100"
+          placeholder="Your name"
+        >
+
+        <button onclick="continueToPhone()">
+          Continue
+        </button>
+
+      </div>
+
+      <div
+        id="chatLeadPhoneStage"
+        class="hidden"
+      >
+
+        <label for="chatLeadPhone">
+          Phone number
+        </label>
+
+        <input
+          id="chatLeadPhone"
+          type="tel"
+          maxlength="30"
+          placeholder="+971..."
+        >
+
+        <button onclick="continueToConsent()">
+          Continue
+        </button>
+
+      </div>
+
+      <div
+        id="chatLeadConsentStage"
+        class="hidden"
+      >
+
+        <p>
+          Do you agree to be contacted by Akkarai Herbals
+          regarding this enquiry?
+        </p>
+
+        <div class="consent-row">
+
+          <input
+            id="chatLeadConsent"
+            type="checkbox"
+          >
+
+          <label for="chatLeadConsent">
+            Yes, I agree to be contacted regarding this enquiry.
+          </label>
+
+        </div>
+
+        <button onclick="saveChatLead()">
+          Confirm Callback Request
+        </button>
+
+      </div>
+
+      <div
+        id="chatLeadStatus"
+        class="status"
+      ></div>
+
+    </div>
+
   </div>
-
-
-  <!-- LEAD CAPTURE -->
 
   <div class="section">
 
     <h2>Request a Callback</h2>
 
     <p>
-      Leave your details and enquiry if you would like
-      the Akkarai Herbals team to contact you.
+      You can also submit your details directly below.
     </p>
-
 
     <label for="leadName">
       Name
@@ -205,7 +288,6 @@
       placeholder="Your name"
     >
 
-
     <label for="leadPhone">
       Phone number
     </label>
@@ -217,7 +299,6 @@
       placeholder="+971..."
     >
 
-
     <label for="leadEnquiry">
       Enquiry
     </label>
@@ -227,7 +308,6 @@
       maxlength="1000"
       placeholder="What would you like to know?"
     ></textarea>
-
 
     <div class="consent-row">
 
@@ -242,14 +322,12 @@
 
     </div>
 
-
     <button
       id="leadButton"
       onclick="submitLead()"
     >
       Submit Enquiry
     </button>
-
 
     <div
       id="leadStatus"
@@ -258,20 +336,15 @@
 
   </div>
 
-
   <script>
-
     const WORKER_URL =
       "https://akkarai-ai-backend.ameerm01012019.workers.dev";
 
+    let lastCustomerEnquiry = "";
 
     async function sendMessage() {
-
       const input =
         document.getElementById("message");
-
-      const chatBox =
-        document.getElementById("chatBox");
 
       const button =
         document.getElementById("sendButton");
@@ -279,11 +352,11 @@
       const message =
         input.value.trim();
 
-
       if (!message) {
         return;
       }
 
+      lastCustomerEnquiry = message;
 
       appendChat(
         "You",
@@ -291,10 +364,8 @@
         "user"
       );
 
-
       input.value = "";
       button.disabled = true;
-
 
       appendChat(
         "Assistant",
@@ -303,9 +374,7 @@
         "thinkingMessage"
       );
 
-
       try {
-
         const response =
           await fetch(
             WORKER_URL,
@@ -324,21 +393,10 @@
             }
           );
 
-
         const data =
           await response.json();
 
-
-        const thinking =
-          document.getElementById(
-            "thinkingMessage"
-          );
-
-
-        if (thinking) {
-          thinking.remove();
-        }
-
+        removeThinking();
 
         if (!response.ok) {
           throw new Error(
@@ -347,26 +405,18 @@
           );
         }
 
-
         appendChat(
           "Assistant",
           data.reply,
           "bot"
         );
 
-
-      } catch (error) {
-
-        const thinking =
-          document.getElementById(
-            "thinkingMessage"
-          );
-
-
-        if (thinking) {
-          thinking.remove();
+        if (shouldOfferLeadCapture(message, data.reply)) {
+          showLeadCaptureOffer();
         }
 
+      } catch (error) {
+        removeThinking();
 
         appendChat(
           "Assistant",
@@ -375,153 +425,185 @@
         );
 
       } finally {
-
         button.disabled = false;
         input.focus();
-
       }
-
     }
 
-
-    function appendChat(
-      speaker,
-      text,
-      className,
-      id = ""
+    function shouldOfferLeadCapture(
+      userMessage,
+      assistantReply
     ) {
+      const combined =
+        (
+          userMessage +
+          " " +
+          assistantReply
+        ).toLowerCase();
 
-      const chatBox =
-        document.getElementById(
-          "chatBox"
-        );
+      const leadWords = [
+        "price",
+        "pricing",
+        "cost",
+        "callback",
+        "call back",
+        "contact",
+        "speak",
+        "someone",
+        "team",
+        "more information",
+        "more details",
+        "product details"
+      ];
 
+      return leadWords.some(
+        word =>
+          combined.includes(word)
+      );
+    }
 
-      const div =
-        document.createElement("div");
-
-
-      div.className =
-        className;
-
-
-      if (id) {
-        div.id = id;
-      }
-
-
-      const strong =
-        document.createElement(
-          "strong"
-        );
-
-
-      strong.textContent =
-        speaker + ": ";
-
-
-      div.appendChild(strong);
-
-
-      div.appendChild(
-        document.createTextNode(text)
+    function showLeadCaptureOffer() {
+      appendChat(
+        "Assistant",
+        "If you'd like a callback, you can provide your details below. I will only save them after you explicitly confirm that Akkarai Herbals may contact you.",
+        "bot"
       );
 
+      document
+        .getElementById(
+          "chatLeadCard"
+        )
+        .classList
+        .remove("hidden");
 
-      chatBox.appendChild(div);
+      document
+        .getElementById(
+          "chatLeadNameStage"
+        )
+        .classList
+        .remove("hidden");
 
+      document
+        .getElementById(
+          "chatLeadPhoneStage"
+        )
+        .classList
+        .add("hidden");
 
-      chatBox.scrollTop =
-        chatBox.scrollHeight;
-
+      document
+        .getElementById(
+          "chatLeadConsentStage"
+        )
+        .classList
+        .add("hidden");
     }
 
-
-    async function submitLead() {
-
+    function continueToPhone() {
       const name =
         document
-          .getElementById("leadName")
+          .getElementById(
+            "chatLeadName"
+          )
           .value
           .trim();
 
+      if (!name) {
+        showChatLeadError(
+          "Please enter your name."
+        );
+        return;
+      }
+
+      document
+        .getElementById(
+          "chatLeadNameStage"
+        )
+        .classList
+        .add("hidden");
+
+      document
+        .getElementById(
+          "chatLeadPhoneStage"
+        )
+        .classList
+        .remove("hidden");
+
+      document
+        .getElementById(
+          "chatLeadStatus"
+        )
+        .textContent = "";
+    }
+
+    function continueToConsent() {
+      const phone =
+        document
+          .getElementById(
+            "chatLeadPhone"
+          )
+          .value
+          .trim();
+
+      if (!phone) {
+        showChatLeadError(
+          "Please enter your phone number."
+        );
+        return;
+      }
+
+      document
+        .getElementById(
+          "chatLeadPhoneStage"
+        )
+        .classList
+        .add("hidden");
+
+      document
+        .getElementById(
+          "chatLeadConsentStage"
+        )
+        .classList
+        .remove("hidden");
+
+      document
+        .getElementById(
+          "chatLeadStatus"
+        )
+        .textContent = "";
+    }
+
+    async function saveChatLead() {
+      const name =
+        document
+          .getElementById(
+            "chatLeadName"
+          )
+          .value
+          .trim();
 
       const phone =
         document
-          .getElementById("leadPhone")
+          .getElementById(
+            "chatLeadPhone"
+          )
           .value
           .trim();
-
-
-      const enquiry =
-        document
-          .getElementById("leadEnquiry")
-          .value
-          .trim();
-
 
       const consent =
         document
-          .getElementById("leadConsent")
+          .getElementById(
+            "chatLeadConsent"
+          )
           .checked;
 
-
-      const status =
-        document.getElementById(
-          "leadStatus"
-        );
-
-
-      const button =
-        document.getElementById(
-          "leadButton"
-        );
-
-
-      status.textContent = "";
-      status.className = "status";
-
-
-      if (!name) {
-
-        showLeadError(
-          "Please enter your name."
-        );
-
-        return;
-
-      }
-
-
-      if (!phone) {
-
-        showLeadError(
-          "Please enter your phone number."
-        );
-
-        return;
-
-      }
-
-
       if (!consent) {
-
-        showLeadError(
+        showChatLeadError(
           "Please confirm that you agree to be contacted."
         );
-
         return;
-
       }
 
-
-      button.disabled = true;
-      button.textContent =
-        "Submitting...";
-
-
       try {
-
         const response =
           await fetch(
             WORKER_URL,
@@ -534,111 +616,279 @@
               },
 
               body: JSON.stringify({
-
-                action: "lead",
-
+                action: "chat_lead",
                 name: name,
-
                 phone: phone,
-
-                enquiry: enquiry,
-
-                consent: consent
-
+                enquiry:
+                  lastCustomerEnquiry,
+                consent: true
               })
-
             }
           );
-
 
         const data =
           await response.json();
 
-
         if (!response.ok) {
-
           throw new Error(
             data.error ||
-            "Unable to save enquiry"
+            "Unable to save callback request"
           );
-
         }
 
+        const status =
+          document.getElementById(
+            "chatLeadStatus"
+          );
 
         status.textContent =
           data.message;
 
-
         status.className =
           "status success";
 
-
-        document
-          .getElementById("leadName")
-          .value = "";
-
-
-        document
-          .getElementById("leadPhone")
-          .value = "";
-
-
-        document
-          .getElementById("leadEnquiry")
-          .value = "";
-
-
-        document
-          .getElementById("leadConsent")
-          .checked = false;
-
-
-      } catch (error) {
-
-        showLeadError(
-          error.message
+        appendChat(
+          "Assistant",
+          "Your callback request has been registered successfully.",
+          "bot"
         );
 
-      } finally {
-
-        button.disabled = false;
-
-        button.textContent =
-          "Submit Enquiry";
-
+      } catch (error) {
+        showChatLeadError(
+          error.message
+        );
       }
-
     }
 
+    function showChatLeadError(message) {
+      const status =
+        document.getElementById(
+          "chatLeadStatus"
+        );
 
-    function showLeadError(message) {
+      status.textContent =
+        message;
+
+      status.className =
+        "status error";
+    }
+
+    async function submitLead() {
+      const name =
+        document
+          .getElementById("leadName")
+          .value
+          .trim();
+
+      const phone =
+        document
+          .getElementById("leadPhone")
+          .value
+          .trim();
+
+      const enquiry =
+        document
+          .getElementById("leadEnquiry")
+          .value
+          .trim();
+
+      const consent =
+        document
+          .getElementById("leadConsent")
+          .checked;
 
       const status =
         document.getElementById(
           "leadStatus"
         );
 
+      const button =
+        document.getElementById(
+          "leadButton"
+        );
+
+      status.textContent = "";
+      status.className = "status";
+
+      if (!name) {
+        showLeadError(
+          "Please enter your name."
+        );
+        return;
+      }
+
+      if (!phone) {
+        showLeadError(
+          "Please enter your phone number."
+        );
+        return;
+      }
+
+      if (!consent) {
+        showLeadError(
+          "Please confirm that you agree to be contacted."
+        );
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent =
+        "Submitting...";
+
+      try {
+        const response =
+          await fetch(
+            WORKER_URL,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                action: "lead",
+                name: name,
+                phone: phone,
+                enquiry: enquiry,
+                consent: consent
+              })
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error ||
+            "Unable to save enquiry"
+          );
+        }
+
+        status.textContent =
+          data.message;
+
+        status.className =
+          "status success";
+
+        document
+          .getElementById(
+            "leadName"
+          )
+          .value = "";
+
+        document
+          .getElementById(
+            "leadPhone"
+          )
+          .value = "";
+
+        document
+          .getElementById(
+            "leadEnquiry"
+          )
+          .value = "";
+
+        document
+          .getElementById(
+            "leadConsent"
+          )
+          .checked = false;
+
+      } catch (error) {
+        showLeadError(
+          error.message
+        );
+
+      } finally {
+        button.disabled = false;
+
+        button.textContent =
+          "Submit Enquiry";
+      }
+    }
+
+    function appendChat(
+      speaker,
+      text,
+      className,
+      id = ""
+    ) {
+      const chatBox =
+        document.getElementById(
+          "chatBox"
+        );
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+      div.className =
+        className;
+
+      if (id) {
+        div.id = id;
+      }
+
+      const strong =
+        document.createElement(
+          "strong"
+        );
+
+      strong.textContent =
+        speaker + ": ";
+
+      div.appendChild(strong);
+
+      div.appendChild(
+        document.createTextNode(
+          text
+        )
+      );
+
+      chatBox.appendChild(div);
+
+      chatBox.scrollTop =
+        chatBox.scrollHeight;
+    }
+
+    function removeThinking() {
+      const thinking =
+        document.getElementById(
+          "thinkingMessage"
+        );
+
+      if (thinking) {
+        thinking.remove();
+      }
+    }
+
+    function showLeadError(message) {
+      const status =
+        document.getElementById(
+          "leadStatus"
+        );
 
       status.textContent =
         message;
 
-
       status.className =
         "status error";
-
     }
 
-
     document
-      .getElementById("message")
+      .getElementById(
+        "message"
+      )
       .addEventListener(
         "keydown",
         function(event) {
-
           if (event.key === "Enter") {
             sendMessage();
           }
-
         }
       );
 
