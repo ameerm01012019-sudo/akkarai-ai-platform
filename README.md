@@ -1,2 +1,6 @@
-# akkarai-ai-platform
-AI customer engagement platform - Website, WhatsApp and Voice AI
+Akkarai AI Platform
+
+Prototype for:
+- Website AI Assistant
+- WhatsApp AI Assistant
+- AI Voice Assistant
